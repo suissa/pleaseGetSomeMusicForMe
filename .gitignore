@@ -5,6 +5,9 @@
 
 */musics
 
+musics/*
+
+*.mp3
 # Logs
 logs
 *.log

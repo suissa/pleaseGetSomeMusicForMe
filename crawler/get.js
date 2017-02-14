@@ -58,18 +58,18 @@ rp(getLinks)
 
         const musics = listToSave.slice(-2).map( el => {
             // console.log('el', el)
-            const PATH = __dirname +'/musics/'+el.artist.replace('/', '_')
+            const PATH = __dirname +'/musics/'+el.artist
             const cb = (err) =>
                 err 
                     ? console.log('Nao rolou criar as pastas aqui', err)
                     : rp.get(`${BASE}${el.url}`)
                         .on(`response`, res => {
-                            console.time(`tempo para baixar ${el.tit_art}.mp3`)
+                            console.time('tempo para baixar ${el.tit_art}.mp3')
                             console.log(`\n\t\t baixando ${el.tit_art} ... `)
                         })
                         .on(`error`, (err) =>
                             console.log(`MERDA AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
-                        .pipe(fs.createWriteStream(PATH+'/'+el.tit_art+'.mp3'))
+                        .pipe(fs.createWriteStream(PATH+'/'+el.tit_art+'/'+el.tit_art+'.mp3'))
                         .on( `finish`, () => {
                             console.log(`\t\t\t Baixada: ${el.tit_art}.mp3`)
                             console.timeEnd(`tempo para baixar ${el.tit_art}.mp3`)
