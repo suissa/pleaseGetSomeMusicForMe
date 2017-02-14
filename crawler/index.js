@@ -50,13 +50,13 @@ rp(getLinks)
         const list = JSON.parse(response.trim())
 
         console.log(`\n\t\t recebi a lista de ${list.feed.length} mp3s ... `)
-        console.log(`\n\t\t MAS BAIXAREI APENAS 2 PARA TESTAR `)
+        console.log(`\n\t\t MAS BAIXAREI APENAS 1 `)
         // console.log(`\n\t\t agora salvarei no banco ... `)
-        console.log(`\n\t\t enquanto baixo TODAS ELAS ... `)
+        // console.log(`\n\t\t enquanto baixo TODAS ELAS ... `)
 
         const listToSave = list.feed.map( el => el.entry )
 
-        const musics = listToSave.slice(-2).map( el => {
+        const musics = listToSave.slice(0,1).map( el => {
             // console.log('el', el)
             const PATH = __dirname +'/musics/'+el.artist.replace('/', '_')
             const cb = (err) =>
