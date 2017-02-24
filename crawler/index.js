@@ -18,6 +18,16 @@ const eventEmitter = new events.EventEmitter()
 // eventEmitter.on('downloaded', downloaded);  
 
 
+function decodeHTMLEntities (str) {
+  if(str && typeof str === 'string') {
+    // strip script/html tags
+    str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
+    str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
+    str = str.replace(/&#x[A-Z][0-9];/gmi, '');
+  }
+
+  return str;
+}
 const ensureExists = (path, mask, cb) => {
     if (typeof mask == 'function') {
         cb = mask
@@ -69,7 +79,7 @@ rp(getLinks)
                         })
                         .on(`error`, (err) =>
                             console.log(`MERDA AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
-                        .pipe(fs.createWriteStream(PATH+'/'+el.tit_art+'.mp3'))
+                        .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
                         .on( `finish`, () => {
                             console.log(`\t\t\t Baixada: ${el.tit_art}.mp3`)
                             console.timeEnd(`tempo para baixar ${el.tit_art}.mp3`)

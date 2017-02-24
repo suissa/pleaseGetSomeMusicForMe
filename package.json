@@ -1,0 +1,31 @@
+{
+  "name": "please-get-some-music-for-me",
+  "version": "0.6.66",
+  "description": "Baixador de musica via terminal",
+  "main": "crawler/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suissa/pleaseGetSomeMusicForMe.git"
+  },
+  "keywords": [
+    "mp3",
+    "musica",
+    "download",
+    "cli",
+    "terminal",
+    "hackudo"
+  ],
+  "author": "Suissa",
+  "license": "WTFPL",
+  "bugs": {
+    "url": "https://github.com/suissa/pleaseGetSomeMusicForMe/issues"
+  },
+  "homepage": "https://github.com/suissa/pleaseGetSomeMusicForMe#readme",
+  "dependencies": {
+    "request": "^2.79.0",
+    "request-promise": "^4.1.1"
+  }
+}
