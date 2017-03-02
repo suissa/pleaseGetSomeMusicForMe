@@ -1,7 +1,8 @@
 #!/usr/bin/env node
+const os = require(`os`)
 const fs = require(`fs`)
 const rp = require(`request-promise`)
-const PATH = '/Users/caionorder/Music/download/'
+const PATH = os.homedir()+'/Music/download/'
 const find = process.argv.filter(el => !el.includes('/')).join('+')
 const page = `&page=0`
 const BASE = `http://slider.kz`
@@ -56,21 +57,21 @@ rp(getLinks)
 
         mp3Down = function(total,listToSave){
             const musics = listToSave.splice(0,total).map( el => {
-                const PATH = '/Users/caionorder/Music/download/'+el.artist.replace('/', '_');
+                const PATH = os.homedir()+'/Music/download/'+el.artist.replace('/', '_');
                 const cb = (err) =>
                     err
-                        ? console.log('ERRO AO CRIAR A PASTA', err)
+                        ? console.log('\n\t\tERRO AO CRIAR A PASTA', err)
                         : rp.get(`${BASE}${el.url}`)
                             .on(`response`,res => {
-                                console.time(`tempo para baixar ${el.tit_art}.mp3`)
+                                console.time(`\n\t\ttempo para baixar ${el.tit_art}.mp3`)
                                 console.log(`\n\t\t baixando ${el.tit_art} ... `)
                             })
                             .on(`error`, (err) =>
-                                console.log(`ERRO AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
+                                console.log(`\n\t\tERRO AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
                             .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
                             .on( `finish`, () => {
-                                console.log(`\t\t\t Baixada: ${el.tit_art}.mp3`)
-                                console.timeEnd(`tempo para baixar ${el.tit_art}.mp3`)
+                                console.log(`\n\t\t Baixada: ${el.tit_art}.mp3`)
+                                console.timeEnd(`\n\t\ttempo para baixar ${el.tit_art}.mp3`)
                                 total++
                                 mp3Down(total,listToSave)
                             })
