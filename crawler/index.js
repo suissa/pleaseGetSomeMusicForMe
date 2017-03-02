@@ -2,7 +2,8 @@
 const os = require(`os`)
 const fs = require(`fs`)
 const rp = require(`request-promise`)
-const PATH = os.homedir()+'/Music/download/'
+// const PATH = os.homedir()+'/Music/download/'
+const PATH = './musics/'
 const find = process.argv.filter(el => !el.includes('/')).join('+')
 const page = `&page=0`
 const BASE = `http://slider.kz`
@@ -11,7 +12,7 @@ const inquirer = require('inquirer')
 
 const events = require('events')
 const eventEmitter = new events.EventEmitter()
-
+console.log('PATH', PATH)
 function decodeHTMLEntities (str) {
   if(str && typeof str === 'string') {
     str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
@@ -94,7 +95,8 @@ rp(getLinks)
 
         mp3Down = function(total,listToSave){
             const musics = listToSave.splice(0,total).map( el => {
-                const PATH = os.homedir()+'/Music/download/'+el.artist.replace('/', '_');
+                // const PATH = os.homedir()+'/Music/download/'+el.artist.replace('/', '_');
+                const path = PATH + el.artist.replace('/', '_');
                 const cb = (err) =>
                     err
                         ? console.log('\n\t\tERRO AO CRIAR A PASTA', err)
@@ -105,15 +107,16 @@ rp(getLinks)
                             })
                             .on(`error`, (err) =>
                                 console.log(`\n\t\tERRO AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
-                            .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
+                            .pipe(fs.createWriteStream(path+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
                             .on( `finish`, () => {
                                 console.log(`\n\t\t Baixada: ${el.tit_art}.mp3`)
                                 console.timeEnd(`\n\t\ttempo para baixar ${el.tit_art}.mp3`)
                                 total++
                                 mp3Down(total,listToSave)
                             })
-                ensureExists( PATH, 0744, cb)
+                ensureExists( path, 0744, cb)
             })
+        }
 
         choose(listToSave, (err, songs) => {
 
@@ -149,9 +152,9 @@ rp(getLinks)
         return false;
 
     })
-    .then( body => {
+    // .then( body => {
 
-    })
+    // })
     .catch( err => {
         console.log(`err`, err)
     })
