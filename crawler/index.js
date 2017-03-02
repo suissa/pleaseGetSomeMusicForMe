@@ -1,6 +1,8 @@
+#!/usr/bin/env node
+const os = require(`os`)
 const fs = require(`fs`)
 const rp = require(`request-promise`)
-const PATH = __dirname + '/musics'
+const PATH = os.homedir()+'/Music/download/'
 const find = process.argv.filter(el => !el.includes('/')).join('+')
 const page = `&page=0`
 const BASE = `http://slider.kz`
@@ -12,14 +14,13 @@ const eventEmitter = new events.EventEmitter()
 
 function decodeHTMLEntities (str) {
   if(str && typeof str === 'string') {
-    // strip script/html tags
     str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gmi, '');
     str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '');
     str = str.replace(/&#x[A-Z][0-9];/gmi, '');
   }
-
   return str;
 }
+
 const ensureExists = (path, mask, cb) => {
     if (typeof mask == 'function') {
         cb = mask
@@ -81,11 +82,38 @@ rp(getLinks)
         const list = JSON.parse(response.trim())
 
         console.log(`\n\t\t recebi a lista de ${list.feed.length} mp3s ... `)
+
         console.log(`\n\t\t MAS BAIXAREI APENAS AS QUE VC ESCOLHER `)
         // console.log(`\n\t\t agora salvarei no banco ... `)
         // console.log(`\n\t\t enquanto baixo TODAS ELAS ... `)
 
+
         const listToSave = list.feed.map( el => el.entry )
+        const totalMp3 = list.feed.length
+        const total = 1
+
+        mp3Down = function(total,listToSave){
+            const musics = listToSave.splice(0,total).map( el => {
+                const PATH = os.homedir()+'/Music/download/'+el.artist.replace('/', '_');
+                const cb = (err) =>
+                    err
+                        ? console.log('\n\t\tERRO AO CRIAR A PASTA', err)
+                        : rp.get(`${BASE}${el.url}`)
+                            .on(`response`,res => {
+                                console.time(`\n\t\ttempo para baixar ${el.tit_art}.mp3`)
+                                console.log(`\n\t\t baixando ${el.tit_art} ... `)
+                            })
+                            .on(`error`, (err) =>
+                                console.log(`\n\t\tERRO AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
+                            .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
+                            .on( `finish`, () => {
+                                console.log(`\n\t\t Baixada: ${el.tit_art}.mp3`)
+                                console.timeEnd(`\n\t\ttempo para baixar ${el.tit_art}.mp3`)
+                                total++
+                                mp3Down(total,listToSave)
+                            })
+                ensureExists( PATH, 0744, cb)
+            })
 
         choose(listToSave, (err, songs) => {
 
@@ -119,18 +147,11 @@ rp(getLinks)
         })
 
         return false;
+
     })
     .then( body => {
-        // console.log(`\n\n\n\t\t SALVEI A PORRA TODA NO BANCO`, body)
-        // console.timeEnd('tempo para baixar TODAS as musicas')
-        // process.exit(1) 
 
     })
     .catch( err => {
-        // API call failed... 
         console.log(`err`, err)
     })
-    // .finally( () => {
-    //     // API call failed... 
-    //     console.log(`Por hoje eh soh pesoal!`)
-    // })
