@@ -5,18 +5,10 @@ const find = process.argv.filter(el => !el.includes('/')).join('+')
 const page = `&page=0`
 const BASE = `http://slider.kz`
 const uri = `${BASE}/new/include/vk_auth.php?act=source1&q=${find}`
+const inquirer = require('inquirer')
 
 const events = require('events')
 const eventEmitter = new events.EventEmitter()
-
-// const downloadedArr = []
-
-// const downloaded = (music) => {
-    
-// }
-
-// eventEmitter.on('downloaded', downloaded);  
-
 
 function decodeHTMLEntities (str) {
   if(str && typeof str === 'string') {
@@ -39,6 +31,37 @@ const ensureExists = (path, mask, cb) => {
             : cb(null))
 }
 
+const choose = (songs, cb) => {
+
+    const question1 = {
+        type: 'checkbox',
+        message: 'Selecione as canções',
+        name: 'songs',
+        choices: [
+          new inquirer.Separator(' = As sonzeiras = ')
+        ],
+        validate: function (answer) {
+          if (answer.length < 1) {
+            
+          }
+          return true;
+        }
+    }
+
+    songs.map((song, key) => {
+        question1.choices.push({ name: song.title })
+    })
+
+    inquirer.prompt([
+      question1
+    ]).then((answers) => {
+        return cb(null, songs
+        .filter((song) => { return answers.songs.includes(song.title) })
+        .map((song) => song))
+    });
+
+}
+
 var getLinks = {
     uri,
     headers: {
@@ -50,8 +73,6 @@ var getLinks = {
 console.time('tempo para receber a resposta')
 console.log(`\n\n\n\t\t INICIANDO A BUSCA PARA: ${find} `)
 
-
-
 rp(getLinks)
     .then(function(response) {
         console.timeEnd('tempo para receber a resposta')
@@ -60,37 +81,44 @@ rp(getLinks)
         const list = JSON.parse(response.trim())
 
         console.log(`\n\t\t recebi a lista de ${list.feed.length} mp3s ... `)
-        console.log(`\n\t\t MAS BAIXAREI APENAS 1 `)
+        console.log(`\n\t\t MAS BAIXAREI APENAS AS QUE VC ESCOLHER `)
         // console.log(`\n\t\t agora salvarei no banco ... `)
         // console.log(`\n\t\t enquanto baixo TODAS ELAS ... `)
 
         const listToSave = list.feed.map( el => el.entry )
 
-        const musics = listToSave.slice(0,1).map( el => {
-            // console.log('el', el)
-            const PATH = __dirname +'/musics/'+el.artist.replace('/', '_')
-            const cb = (err) =>
-                err 
-                    ? console.log('Nao rolou criar as pastas aqui', err)
-                    : rp.get(`${BASE}${el.url}`)
-                        .on(`response`, res => {
-                            console.time(`tempo para baixar ${el.tit_art}.mp3`)
-                            console.log(`\n\t\t baixando ${el.tit_art} ... `)
-                        })
-                        .on(`error`, (err) =>
-                            console.log(`MERDA AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
-                        .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
-                        .on( `finish`, () => {
-                            console.log(`\t\t\t Baixada: ${el.tit_art}.mp3`)
-                            console.timeEnd(`tempo para baixar ${el.tit_art}.mp3`)
-                            // process.exit(1) 
-                        })
+        choose(listToSave, (err, songs) => {
 
-            // console.log('PATH', PATH)
-            ensureExists( PATH, 0744, cb)
-        }
-        )
-        return listToSave
+            songs 
+                ? songs.map( el => {
+                    const PATH = __dirname +'/musics/'+el.artist.replace('/', '_')
+                    const cb = (err) =>
+                    err 
+                        ? console.log('Nao rolou criar as pastas aqui', err)
+                        : rp.get(`${BASE}${el.url}`)
+                            .on(`response`, res => {
+                                console.time(`tempo para baixar ${el.tit_art}.mp3`)
+                                console.log(`\n\t\t baixando ${el.tit_art} ... `)
+                            })
+                            .on(`error`, (err) =>
+                                console.log(`MERDA AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
+                            .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
+                            .on( `finish`, () => {
+                                console.log(`\t\t\t Baixada: ${el.tit_art}.mp3`)
+                                console.timeEnd(`tempo para baixar ${el.tit_art}.mp3`)
+                                // process.exit(1) 
+                            })
+
+                    // console.log('PATH', PATH)
+                    ensureExists( PATH, 0744, cb)
+                    }
+                    )
+                : console.log("não foi escolhido/encontrado nenhuma música")
+            
+            return songs;
+        })
+
+        return false;
     })
     .then( body => {
         // console.log(`\n\n\n\t\t SALVEI A PORRA TODA NO BANCO`, body)
