@@ -89,36 +89,36 @@ rp(getLinks)
 
         choose(listToSave, (err, songs) => {
 
-            (err) => throw new TypeError('erro')
+            songs 
+                ? songs.map( el => {
+                    const PATH = __dirname +'/musics/'+el.artist.replace('/', '_')
+                    const cb = (err) =>
+                    err 
+                        ? console.log('Nao rolou criar as pastas aqui', err)
+                        : rp.get(`${BASE}${el.url}`)
+                            .on(`response`, res => {
+                                console.time(`tempo para baixar ${el.tit_art}.mp3`)
+                                console.log(`\n\t\t baixando ${el.tit_art} ... `)
+                            })
+                            .on(`error`, (err) =>
+                                console.log(`MERDA AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
+                            .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
+                            .on( `finish`, () => {
+                                console.log(`\t\t\t Baixada: ${el.tit_art}.mp3`)
+                                console.timeEnd(`tempo para baixar ${el.tit_art}.mp3`)
+                                // process.exit(1) 
+                            })
 
-            const musics = songs.map( el => {
-            // console.log('el', el)
-            const PATH = __dirname +'/musics/'+el.artist.replace('/', '_')
-            const cb = (err) =>
-                err 
-                    ? console.log('Nao rolou criar as pastas aqui', err)
-                    : rp.get(`${BASE}${el.url}`)
-                        .on(`response`, res => {
-                            console.time(`tempo para baixar ${el.tit_art}.mp3`)
-                            console.log(`\n\t\t baixando ${el.tit_art} ... `)
-                        })
-                        .on(`error`, (err) =>
-                            console.log(`MERDA AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
-                        .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
-                        .on( `finish`, () => {
-                            console.log(`\t\t\t Baixada: ${el.tit_art}.mp3`)
-                            console.timeEnd(`tempo para baixar ${el.tit_art}.mp3`)
-                            // process.exit(1) 
-                        })
-
-            // console.log('PATH', PATH)
-                ensureExists( PATH, 0744, cb)
-            }
-            )
+                    // console.log('PATH', PATH)
+                    ensureExists( PATH, 0744, cb)
+                    }
+                    )
+                : console.log("não foi escolhido/encontrado nenhuma música")
+            
+            return songs;
         })
 
-        
-        return listToSave
+        return false;
     })
     .then( body => {
         // console.log(`\n\n\n\t\t SALVEI A PORRA TODA NO BANCO`, body)
