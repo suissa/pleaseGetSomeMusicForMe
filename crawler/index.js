@@ -34,6 +34,8 @@ const ensureExists = (path, mask, cb) => {
             : cb(null))
 }
 
+const removeDupes = (song, i, self) => self.findIndex(s => s.tit_art == song.tit_art) === i
+
 const choose = (songs, cb) => {
 
     const question1 = {
@@ -52,15 +54,16 @@ const choose = (songs, cb) => {
     }
 
     songs.map((song, key) => {
-        question1.choices.push({ name: song.title })
+        question1.choices.push({ name: song.tit_art })
     })
 
     inquirer.prompt([
       question1
     ]).then((answers) => {
         return cb(null, songs
-        .filter((song) => { return answers.songs.includes(song.title) })
-        .map((song) => song))
+            .filter((song) => answers.songs.includes(song.tit_art))
+            .filter(removeDupes)
+        )
     });
 
 }
