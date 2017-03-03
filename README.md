@@ -3,7 +3,16 @@
 
 > Ok.
 
-```
-node index NOME_DO_ARTISTA_OU_DA_MUSICA
+<br>
+
+Entre na pasta `crawler` e execute:
+
+
 ```
 
+node index NOME DO ARTISTA OU DA MUSICA SEM ASPAS E COM ESPAÇO
+
+
+```
+
+![Exmeplo de utilização](http://i.imgur.com/QZrVK9D.png)

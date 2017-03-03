@@ -4,7 +4,8 @@ const fs = require(`fs`)
 const rp = require(`request-promise`)
 // const PATH = os.homedir()+'/Music/download/'
 const PATH = './musics/'
-const find = process.argv.filter(el => !el.includes('/')).join('+')
+const find = process.argv.filter(el => 
+  !el.includes('/') && !el.includes('\\') ).join('+')
 const page = `&page=0`
 const BASE = `http://slider.kz`
 const uri = `${BASE}/new/include/vk_auth.php?act=source1&q=${find}`
