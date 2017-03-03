@@ -10,6 +10,9 @@ const BASE = `http://slider.kz`
 const uri = `${BASE}/new/include/vk_auth.php?act=source1&q=${find}`
 const inquirer = require('inquirer')
 
+const Entities = require('html-entities').AllHtmlEntities
+const entities = new Entities()
+
 const events = require('events')
 const eventEmitter = new events.EventEmitter()
 console.log('PATH', PATH)
@@ -34,7 +37,6 @@ const ensureExists = (path, mask, cb) => {
 }
 
 const choose = (songs, cb) => {
-
     const question1 = {
         type: 'checkbox',
         message: 'Selecione as canções',
@@ -51,14 +53,14 @@ const choose = (songs, cb) => {
     }
 
     songs.map((song, key) => {
-        question1.choices.push({ name: song.title })
+        question1.choices.push({ name: entities.decode(song.title) })
     })
 
     inquirer.prompt([
       question1
     ]).then((answers) => {
         return cb(null, songs
-        .filter((song) => { return answers.songs.includes(song.title) })
+        .filter((song) => { return answers.songs.includes(entities.decode(song.title)) })
         .map((song) => song))
     });
 
@@ -119,24 +121,25 @@ rp(getLinks)
         }
 
         choose(listToSave, (err, songs) => {
-
             songs 
                 ? songs.map( el => {
-                    const PATH = __dirname +'/musics/'+el.artist.replace('/', '_')
+                    const PATH = __dirname +'/musics/'+ entities.decode(el.artist).replace('/', '_')
                     const cb = (err) =>
                     err 
                         ? console.log('Nao rolou criar as pastas aqui', err)
-                        : rp.get(`${BASE}${el.url}`)
+                        : rp.get(entities.decode(`${BASE}${el.url}`))
                             .on(`response`, res => {
-                                console.time(`tempo para baixar ${el.tit_art}.mp3`)
-                                console.log(`\n\t\t baixando ${el.tit_art} ... `)
+                                let title = entities.decode(el.tit_art)
+                                console.time(`tempo para baixar ${title}.mp3`)
+                                console.log(`\n\t\t baixando ${title} ... `)
                             })
                             .on(`error`, (err) =>
                                 console.log(`MERDA AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
-                            .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
+                            .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(entities.decode(el.tit_art)+'.mp3')))
                             .on( `finish`, () => {
-                                console.log(`\t\t\t Baixada: ${el.tit_art}.mp3`)
-                                console.timeEnd(`tempo para baixar ${el.tit_art}.mp3`)
+                                let title = entities.decode(el.tit_art)
+                                console.log(`\t\t\t Baixada: ${title}.mp3`)
+                                console.timeEnd(`tempo para baixar ${title}.mp3`)
                                 // process.exit(1) 
                             })
 
