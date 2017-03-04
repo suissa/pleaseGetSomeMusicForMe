@@ -75,7 +75,7 @@ const choose = (songs, cb) => {
     question1
   ]).then((answers) => {
       return cb(null, {
-          artist: artists,
+          artist: artist,
           songs: songs
           .filter((song) => answers.songs.includes(song.tit_art))
           .filter(removeDupes)
@@ -162,7 +162,7 @@ rp(getLinks)
             ensureExists( PATH, 0744, cb)
           })
         
-        return songs
+        return response.songs
     })
 
     return false
