@@ -13,6 +13,20 @@ const inquirer = require('inquirer')
 
 const events = require('events')
 const eventEmitter = new events.EventEmitter()
+
+const findBestArtistMatch = (str, anotherString) => {
+    //TODO: improve validation
+    if (str.length < anotherString.length) {
+        let match = new RegExp(str, 'i').test(find.replace('+', ' '))
+
+        if (!match) {
+            return anotherString
+        }
+    }
+
+    return str
+}
+
 console.log('PATH', PATH)
 function decodeHTMLEntities (str) {
   if(str && typeof str === 'string') {
@@ -38,6 +52,8 @@ const removeDupes = (song, i, self) => self.findIndex(s => s.tit_art == song.tit
 
 const choose = (songs, cb) => {
 
+  const artists = []
+
   const question1 = {
     type: 'checkbox',
     message: 'Selecione as canções',
@@ -48,17 +64,22 @@ const choose = (songs, cb) => {
     validate: (answer) => !! answer.length
   }
 
-
   songs.map((song, key) => {
       question1.choices.push({ name: song.tit_art })
+      if (!artists.includes(song.artist)) artists.push(song.artist)
   })
+
+  const artist = artists.reduce(findBestArtistMatch);
 
   inquirer.prompt([
     question1
   ]).then((answers) => {
-      return cb(null, songs
+      return cb(null, {
+          artist: artists,
+          songs: songs
           .filter((song) => answers.songs.includes(song.tit_art))
           .filter(removeDupes)
+        }
       )
   });
 
@@ -114,12 +135,12 @@ rp(getLinks)
       })
     }
 
-    choose(listToSave, (err, songs) => {
+    choose(listToSave, (err, response) => {
 
-      ( ! songs )
+      ( ! response.songs )
         ? console.log("não foi escolhido/encontrado nenhuma música")
-        : songs.map( el => {
-            const PATH = __dirname +'/musics/'+el.artist.replace('/', '_')
+        : response.songs.map( el => {
+            const PATH = __dirname +'/musics/'+response.artist.replace('/', '_')
             const cb = (err) =>
             err 
                 ? console.log('Nao rolou criar as pastas aqui', err)
