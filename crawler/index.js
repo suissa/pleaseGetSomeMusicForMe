@@ -167,7 +167,7 @@ rp(getLinks)
               all([{
                 then: (resolve, reject) => {
                   ensureExists(PATH, 0744, (err) => {
-                    return resolve(0)
+                    return resolve(err)
                   })
                 }
               }, {
