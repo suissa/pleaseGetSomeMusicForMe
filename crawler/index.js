@@ -119,7 +119,7 @@ rp(getLinks)
       ( ! songs )
         ? console.log("não foi escolhido/encontrado nenhuma música")
         : songs.map( el => {
-            const PATH = __dirname +'/musics/'+el.artist.replace('/', '_')
+            const ARTISTPATH = PATH + el.artist.replace('/', '_')
             const cb = (err) =>
             err 
                 ? console.log('Nao rolou criar as pastas aqui', err)
@@ -130,7 +130,7 @@ rp(getLinks)
                     })
                     .on(`error`, (err) =>
                         console.log(`MERDA AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
-                    .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
+                    .pipe(fs.createWriteStream(ARTISTPATH+'/'+decodeHTMLEntities(el.tit_art+'.mp3')))
                     .on( `finish`, () => {
                         console.log(`\t\t\t Baixada: ${el.tit_art}.mp3`)
                         console.timeEnd(`tempo para baixar ${el.tit_art}.mp3`)
@@ -138,7 +138,20 @@ rp(getLinks)
                     })
 
             // console.log('PATH', PATH)
-            ensureExists( PATH, 0744, cb)
+            Promise.
+              all([{
+                then: (resolve, reject) => {
+                  ensureExists(PATH, 0744, (err) => {
+                    return resolve(0)
+                  })
+                }
+              }, {
+                then: (resolve, reject) => ensureExists(ARTISTPATH, 0744, (err) => resolve(err))
+              }])
+              //artist folder
+              .then(err => (err.reduce((f, s) => f || s)) ? Promise.reject(err) : cb(null))
+              .catch(err => cb(err))
+            
           })
         
         return songs
