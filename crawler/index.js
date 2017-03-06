@@ -67,8 +67,9 @@ const choose = (songs, cb) => {
   }
 
   songs.map((song, key) => {
-      question1.choices.push({ name: entities.decode(song.tit_art) })
+      question1.choices.push({ name: song.tit_art })
       if (!artists.includes(song.artist)) artists.push(song.artist)
+      question1.choices.push({ name: entities.decode(song.tit_art) })
   })
 
   const artist = artists.reduce(findBestArtistMatch);
@@ -142,7 +143,7 @@ rp(getLinks)
       ( ! response.songs )
         ? console.log("não foi escolhido/encontrado nenhuma música")
         : songs.map( el => {
-            const PATH = __dirname +'/musics/'+entities.decode(response.artist).replace('/', '_')
+            const ARTISTPATH = PATH + entities.decode(el.artist).replace('/', '_')
             const title = entities.decode(el.tit_art)
             const cb = (err) =>
             err 
@@ -154,7 +155,7 @@ rp(getLinks)
                     })
                     .on(`error`, (err) =>
                         console.log(`MERDA AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
-                    .pipe(fs.createWriteStream(PATH+'/'+decodeHTMLEntities(title+'.mp3')))
+                    .pipe(fs.createWriteStream(ARTISTPATH+'/'+decodeHTMLEntities(title+'.mp3')))
                     .on( `finish`, () => {
                         console.log(`\t\t\t Baixada: ${title}.mp3`)
                         console.timeEnd(`tempo para baixar ${title}.mp3`)
@@ -162,7 +163,20 @@ rp(getLinks)
                     })
 
             // console.log('PATH', PATH)
-            ensureExists( PATH, 0744, cb)
+            Promise.
+              all([{
+                then: (resolve, reject) => {
+                  ensureExists(PATH, 0744, (err) => {
+                    return resolve(0)
+                  })
+                }
+              }, {
+                then: (resolve, reject) => ensureExists(ARTISTPATH, 0744, (err) => resolve(err))
+              }])
+              //artist folder
+              .then(err => (err.reduce((f, s) => f || s)) ? Promise.reject(err) : cb(null))
+              .catch(err => cb(err))
+            
           })
         
         return response.songs
