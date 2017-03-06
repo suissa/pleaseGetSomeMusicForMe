@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/suissa/pleaseGetSomeMusicForMe#readme",
   "dependencies": {
+    "html-entities": "^1.2.0",
     "inquirer": "^3.0.5",
     "request": "^2.79.0",
     "request-promise": "^4.1.1"
