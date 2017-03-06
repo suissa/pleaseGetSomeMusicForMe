@@ -140,15 +140,12 @@ rp(getLinks)
             // console.log('PATH', PATH)
             Promise.
               all([{
-                then: (resolve, reject) => {
-                  ensureExists(PATH, 0744, (err) => {
-                    return resolve(err)
-                  })
-                }
+                //main folder
+                then: (resolve, reject) => ensureExists(PATH, 0744, (err) => resolve(err))
               }, {
+                //artist folder
                 then: (resolve, reject) => ensureExists(ARTISTPATH, 0744, (err) => resolve(err))
               }])
-              //artist folder
               .then(err => (err.reduce((f, s) => f || s)) ? Promise.reject(err) : cb(null))
               .catch(err => cb(err))
             
