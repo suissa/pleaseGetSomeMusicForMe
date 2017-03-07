@@ -15,6 +15,20 @@ const entities = new Entities()
 
 const events = require('events')
 const eventEmitter = new events.EventEmitter()
+
+const findBestArtistMatch = (str, anotherString) => {
+    //TODO: improve validation
+    if (str.length < anotherString.length) {
+        let match = new RegExp(str, 'i').test(find.replace('+', ' '))
+
+        if (!match) {
+            return anotherString
+        }
+    }
+
+    return str
+}
+
 console.log('PATH', PATH)
 function decodeHTMLEntities (str) {
   if(str && typeof str === 'string') {
@@ -40,6 +54,8 @@ const removeDupes = (song, i, self) => self.findIndex(s => entities.decode(s.tit
 
 const choose = (songs, cb) => {
 
+  const artists = []
+
   const question1 = {
     type: 'checkbox',
     message: 'Selecione as canções',
@@ -50,17 +66,22 @@ const choose = (songs, cb) => {
     validate: (answer) => !! answer.length
   }
 
-
   songs.map((song, key) => {
       question1.choices.push({ name: entities.decode(song.tit_art) })
+      if (!artists.includes(song.artist)) artists.push(song.artist)
   })
+
+  const artist = artists.reduce(findBestArtistMatch);
 
   inquirer.prompt([
     question1
   ]).then((answers) => {
-      return cb(null, songs
+      return cb(null, {
+          artist: artist,
+          songs: songs
           .filter((song) => answers.songs.includes(entities.decode(song.tit_art)))
           .filter(removeDupes)
+        }
       )
   });
 
@@ -116,12 +137,12 @@ rp(getLinks)
       })
     }
 
-    choose(listToSave, (err, songs) => {
+    choose(listToSave, (err, response) => {
 
-      ( ! songs )
+      ( ! response.songs )
         ? console.log("não foi escolhido/encontrado nenhuma música")
         : songs.map( el => {
-            const PATH = __dirname +'/musics/'+entities.decode(el.artist).replace('/', '_')
+            const PATH = __dirname +'/musics/'+entities.decode(response.artist).replace('/', '_')
             const title = entities.decode(el.tit_art)
             const cb = (err) =>
             err 
@@ -144,7 +165,7 @@ rp(getLinks)
             ensureExists( PATH, 0744, cb)
           })
         
-        return songs
+        return response.songs
     })
 
     return false
