@@ -1,200 +1,98 @@
 #!/usr/bin/env node
 const os = require(`os`)
 const fs = require(`fs`)
-const rp = require(`request-promise`)
+
+const utils = require('./util')
+
 const inquirer = require('inquirer')
 const Entities = require('html-entities').AllHtmlEntities
 const entities = new Entities()
-// const PATH = os.homedir()+'/Music/download/'
 const PATH = './musics/'
-const page = `&page=0`
-const BASE = `http://slider.kz`
+const SliderKZ = require('./providers/sliderkz')
+const MusicPleer = require('./providers/musicpleer')
 
-const getFind = ( el ) => !el.includes( '/' ) && !el.includes( '\\' ) 
-
-const find = process.argv.filter( getFind ).join('+')
-const uri = `${BASE}/new/include/vk_auth.php?act=source1&q=${find}`
+const find = process.argv.filter( utils.getFind ).join('+')
 
 const events = require('events')
 const eventEmitter = new events.EventEmitter()
 
-const findBestArtistMatch = ( str, anotherString ) => {
-  //TODO: improve validation
-  if ( str.length < anotherString.length ) {
-      let match = new RegExp( str, 'i' ).test( find.replace( '+', ' ' ) )
-
-      if (!match) {
-          return anotherString
-      }
-  }
-
-  return str
-}
-
-// console.log('PATH', PATH)
-function decodeHTMLEntities (str) {
-  if( str && typeof str === 'string' ) {
-    str = str.replace( /<script[^>]*>([\S\s]*?)<\/script>/gmi, '' )
-    str = str.replace( /<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gmi, '' )
-    str = str.replace( /&#x[A-Z][0-9]/gmi, '' )
-  }
-  return str
-}
-
-const ensureExists = ( path, mask, cb ) => {
-  if ( typeof mask === 'function' ) {
-    cb = mask
-    mask = 0777
-  }
-  fs.mkdir( path, mask, (err) =>
-    ( err ) 
-      ? ( err.code == 'EEXIST' ) ? cb( null ) : cb( err )
-      : cb( null )
-  )
-}
-
-const getIndex = ( s, song ) => entities.decode(s.tit_art) == entities.decode(song.tit_art)
-const removeDupes = (song, i, self) => 
-  self.findIndex( getIndex( s, song ) ) === i
-
-const choose = (songs, cb) => {
-
-  const artists = []
-
-  const question1 = {
-    type: 'checkbox',
-    message: 'Selecione as canções',
-    name: 'songs',
-    choices: [
-      new inquirer.Separator(' = As sonzeiras = ')
-    ],
-    validate: (answer) => !! answer.length
-  }
-
-  songs.map( ( song, key ) => {
-      question1.choices.push( { name: song.tit_art } )
-      if ( !artists.includes( song.artist )) 
-        artists.push( song.artist  )
-      
-      question1.choices.push( { name: entities.decode(song.tit_art) })
-  })
-
-  const artist = artists.reduce( findBestArtistMatch )
-
-  inquirer.prompt([
-    question1
-  ]).then( ( answers ) => {
-      return cb( null, {
-          artist: artist,
-          songs: songs
-          .filter((song) => answers.songs.includes(entities.decode(song.tit_art)))
-          .filter(removeDupes)
-        }
-      )
-  });
-
-}
-
-var getLinks = {
-  uri,
-  headers: {
-      'Content-Type': `application/json`
-  },
-  json: true
-}
-
 console.time( 'tempo para receber a resposta' )
 console.log(`\n\n\n\t\t INICIANDO A BUSCA PARA: ${find} ` )
 
-rp(getLinks)
-  .then( ( response ) => {
-    console.timeEnd('tempo para receber a resposta')
-    if ( ! response.trim().length ) return console.log('Não achou essa busca!')
+const choose = (songs, cb) => {
 
-    const list = JSON.parse(response.trim())
+    const artists = []
 
-    console.log(`\n\t\t Recebi a lista de ${list.feed.length} mp3s ... `)
-    console.log(`\n\t\t MAS BAIXAREI APENAS AS QUE VC ESCOLHER! `)
-
-    const listToSave = list.feed.map( el => el.entry )
-    const totalMp3 = list.feed.length
-    const total = 1
-
-    mp3Down = ( total,listToSave ) => {
-      const musics = listToSave.splice(0,total).map( el => {
-        // const PATH = os.homedir()+'/Music/download/'+el.artist.replace('/', '_')
-        const path = PATH + el.artist.replace(/\//g, '_')
-        const cb = (err) =>
-          err
-            ? console.log( '\n\t\tERRO AO CRIAR A PASTA', err )
-            : rp.get(`${BASE}${el.url}`)
-                .on(`response`,res => {
-                  console.time( `\n\t\ttempo para baixar ${el.tit_art}.mp3` )
-                  console.log( `\n\t\t baixando ${el.tit_art} ... ` )
-                })
-                .on(`error`, (err) =>
-                  console.log( `\n\t\tERRO AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art ))
-                .pipe( fs.createWriteStream( path+'/'+decodeHTMLEntities(el.tit_art+'.mp3' ) ))
-                .on( `finish`, () => {
-                  console.log( `\n\t\t Baixada: ${el.tit_art}.mp3` )
-                  console.timeEnd( `\n\t\ttempo para baixar ${el.tit_art}.mp3` )
-                  total++
-                  mp3Down( total,listToSave )
-                })
-        ensureExists( path, 0744, cb)
-      })
+    const question1 = {
+      type: 'checkbox',
+      message: 'Selecione as canções',
+      name: 'songs',
+      choices: [
+        new inquirer.Separator(' = As sonzeiras = ')
+      ],
+      validate: (answer) => !! answer.length
     }
 
-    choose(listToSave, (err, response) => {
-
-      ( !response.songs )
-        ? console.log("não foi escolhido/encontrado nenhuma música")
-        : songs.map( el => {
-            const ARTISTPATH = PATH + entities.decode(el.artist).replace('/', '_')
-            const title = entities.decode(el.tit_art)
-            const cb = (err) =>
-            err 
-                ? console.log('Nao rolou criar as pastas aqui', err)
-                : rp.get(entities.decode(`${BASE}${el.url}`))
-                    .on(`response`, res => {
-                        console.time(`tempo para baixar ${title}.mp3`)
-                        console.log(`\n\t\t baixando ${title} ... `)
-                    })
-                    .on(`error`, (err) =>
-                        console.log(`MERDA AO BAIXAR DE: ${BASE}${el.url} \n`, el.tit_art))
-                    .pipe(fs.createWriteStream(ARTISTPATH+'/'+decodeHTMLEntities(title+'.mp3')))
-                    .on( `finish`, () => {
-                        console.log(`\t\t\t Baixada: ${title}.mp3`)
-                        console.timeEnd(`tempo para baixar ${title}.mp3`)
-                        // process.exit(1) 
-                    })
-
-            // console.log('PATH', PATH)
-            Promise.
-              all([{
-                then: (resolve, reject) => {
-                  ensureExists(PATH, 0744, (err) => {
-                    return resolve(0)
-                  })
-                }
-              }, {
-                then: (resolve, reject) => ensureExists(ARTISTPATH, 0744, (err) => resolve(err))
-              }])
-              //artist folder
-              .then(err => (err.reduce((f, s) => f || s)) ? Promise.reject(err) : cb(null))
-              .catch(err => cb(err))
-            
-          })
+    songs.map( ( song, key ) => {
+        question1.choices.push( { name: song.tit_art } )
+        if ( !artists.includes( song.artist ) && song.artist != '' ) {
+          artists.push( song.artist  )
+        }
         
-        return response.songs
+        question1.choices.push( { name: entities.decode(song.tit_art) })
     })
 
-    return false
+    const artist = ( artists.length > 1 ) ? artists.reduce( utils.findBestArtistMatch ) : artists[0]
 
-  })
-  // .then( body => {
+    inquirer.prompt([
+      question1
+    ]).then( ( answers ) => {
+        return cb( null, {
+            artist: artist,
+            songs: songs
+            .filter((song) => answers.songs.includes(entities.decode(song.tit_art)))
+            .filter(utils.removeDupes)
+          }
+        )
+    });
 
-  // })
-  .catch( err => {
-      console.log(`err`, err)
+  }
+
+Promise.properRace([
+  MusicPleer.search(find),
+  SliderKZ.search(find)
+]).then(body => {
+
+  choose(body.songs, (err, response) => {
+
+    ( !response.songs )
+      ? console.log("não foi escolhido/encontrado nenhuma música")
+      : response.songs.map( el => {
+          const ARTISTPATH = PATH + entities.decode(response.artist).replace('/', '_')
+          const title = entities.decode(el.tit_art)
+          const cb = (err) =>
+          err 
+              ? console.log('Nao rolou criar as pastas aqui', err)
+              : body.download(title, entities.decode(el.url), ARTISTPATH+'/'+utils.decodeHTMLEntities(title+'.mp3'))
+
+          Promise.
+            all([{
+              then: (resolve, reject) => {
+                utils.ensureExists(PATH, 0744, (err) => {
+                  return resolve(0)
+                })
+              }
+            }, {
+              then: (resolve, reject) => utils.ensureExists(ARTISTPATH, 0744, (err) => resolve(err))
+            }])
+            //artist folder
+            .then(err => (err.reduce((f, s) => f || s)) ? Promise.reject(err) : cb(null))
+            .catch(err => cb(err))
+          
+        })
+      
+      return response.songs
   })
+}, function (err) {
+  console.log(err)
+})
