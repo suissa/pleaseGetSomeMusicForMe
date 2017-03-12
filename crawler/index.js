@@ -10,8 +10,9 @@ const entities = new Entities()
 const PATH = './musics/'
 const SliderKZ = require('./providers/sliderkz')
 const MusicPleer = require('./providers/musicpleer')
+const YoutubeInMp3 = require('./providers/youtubeinmp3')
 
-const find = process.argv.filter( utils.getFind ).join('+')
+find = process.argv.filter( utils.getFind ).join('+')
 
 const events = require('events')
 const eventEmitter = new events.EventEmitter()
@@ -58,9 +59,10 @@ const choose = (songs, cb) => {
 
   }
 
-Promise.properRace([
+Promise.enhancedRace([
   MusicPleer.search(find),
-  SliderKZ.search(find)
+  SliderKZ.search(find),
+  YoutubeInMp3.search(find)
 ]).then(body => {
 
   choose(body.songs, (err, response) => {
