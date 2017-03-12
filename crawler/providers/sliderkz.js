@@ -44,7 +44,7 @@ SliderKZ.prototype.search = function (query) {
         download: self.prepareForDownload
       }
     })
-    .catch(err => err))
+    .catch(err => Promise.reject("não foi encontrado resultados em Slider.KZ")))
 }
 
 SliderKZ.prototype.prepareForDownload = function (title, uri, path) {

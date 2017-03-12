@@ -55,7 +55,7 @@ MusicPleer.prototype.search = function (query) {
         download: self.prepareForDownload
       }
     })
-    .catch(err => err))
+    .catch(err => Promise.reject("não foi encontrado resultados em MusicPleer")))
 
 }
 
@@ -77,7 +77,7 @@ MusicPleer.prototype.prepareForDownload = function (title, uri, path) {
       .pipe(fs.createWriteStream(path))
       .on( `finish`, () => {
           console.log(`\t\t\t Baixada: ${title}.mp3`)
-          console.timeEnd(`tempo para baixar ${title}.mp3  de MusicPleer`)
+          console.timeEnd(`tempo para baixar ${title}.mp3 de MusicPleer`)
       })
     })
   )

@@ -4,18 +4,18 @@ const entities = new Entities()
 
 var getIndex = ( s, song ) => entities.decode(s.tit_art) == entities.decode(song.tit_art)
 
-Promise.properRace = function(promises) {
+Promise.enhancedRace = function(promises) {
   if (promises.length < 1) {
-    return Promise.reject('Buscador nnao encontrou nada!');
+    return Promise.reject('não há buscadores');
   }
   // There is no way to know which promise is rejected.
   // So we map it to a new promise to return the index when it fails
   let indexPromises = promises.map((p, index) => p.catch(() => {throw index;}));
   return Promise.race(indexPromises).catch(index => {
-  // The promise has rejected, remove it from the list of promises and just continue the race.
-  let p = promises.splice(index, 1)[0];
-  p.catch(e => console.log('err', e));
-    return Promise.properRace(promises);
+    // The promise has rejected, remove it from the list of promises and just continue the race.
+    let p = promises.splice(index, 1)[0];
+    p.catch(e => console.log('err', e));
+    return Promise.enhancedRace(promises);
   })
 }
 
@@ -25,7 +25,7 @@ module.exports = {
 
   findBestArtistMatch: ( str, anotherString ) => {
     //TODO: improve validation
-    if ( str.length < anotherString.length ) {
+    if ( anotherString.length > anotherString.length ) {
       let match = new RegExp( str, 'i' ).test( find.replace( '+', ' ' ) )
 
       if (!match) {
@@ -51,7 +51,7 @@ module.exports = {
       cb = mask
       mask = 0777
     }
-    fs.mkdir( path, mask, (err) =>
+    fs.mkdir( path.replace('"', '').replace('"', ''), mask, (err) =>
       ( err ) 
         ? ( err.code == 'EEXIST' ) ? cb( null ) : cb( err )
         : cb( null )

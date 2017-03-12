@@ -29,7 +29,8 @@
     "html-entities": "^1.2.0",
     "inquirer": "^3.0.5",
     "request": "^2.79.0",
-    "request-promise": "^4.1.1"
+    "request-promise": "^4.1.1",
+    "youtube-crawler": "0.0.3"
   },
   "bin": {
     "filesearch": "./crawler/index.js"
