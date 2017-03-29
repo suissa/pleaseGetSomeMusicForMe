@@ -71,10 +71,10 @@ MusicPleer.prototype.prepareForDownload = function (title, uri, path) {
           console.time(`tempo para baixar ${title}.mp3 de MusicPleer`)
           console.log(`\n\t\t baixando ${title} ... `)
         })
+        .pipe(fs.createWriteStream(path))
         .on(`error`, (err) =>
           console.log(`MERDA AO BAIXAR DE: ${songUrl} \n`, title))
       //.pipe(fs.createWriteStream())
-      .pipe(fs.createWriteStream(path))
       .on( `finish`, () => {
           console.log(`\t\t\t Baixada: ${title}.mp3`)
           console.timeEnd(`tempo para baixar ${title}.mp3 de MusicPleer`)
