@@ -2,7 +2,6 @@
   "name": "please-get-some-music-for-me",
   "version": "1.6.66",
   "description": "Baixador de musica via terminal",
-  "main": "crawler/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -33,6 +32,8 @@
     "youtube-crawler": "0.0.3"
   },
   "bin": {
-    "filesearch": "./crawler/index.js"
-  }
+    "mp3": "./crawler/index.js"
+  },
+  "main" : "./crawler/index.js",
+  "preferGlobal": "true"
 }
