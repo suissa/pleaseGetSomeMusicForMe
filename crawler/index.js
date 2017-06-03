@@ -35,7 +35,6 @@ const choose = (songs, cb) => {
     }
 
     songs.map( ( song, key ) => {
-        question1.choices.push( { name: song.tit_art } )
         if ( !artists.includes( song.artist ) && song.artist != '' ) {
           artists.push( song.artist  )
         }

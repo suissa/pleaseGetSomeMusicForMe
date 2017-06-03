@@ -80,16 +80,16 @@ YoutubeInMp3.prototype.prepareForDownload = function (title, uri, path) {
           console.time(`tempo para baixar ${title}.mp3 de YoutubeInMp3`)
           console.log(`\n\t\t baixando ${title} ... `)
         })
+        .pipe(fs.createWriteStream(path))
         .on(`error`, (err) =>
           console.log(`MERDA AO BAIXAR DE: ${url} \n`, title))
-      //.pipe(fs.createWriteStream())
-      .pipe(fs.createWriteStream(path))
-      .on( `finish`, () => {
-          console.log(`\t\t\t Baixada: ${title}.mp3`)
-          console.timeEnd(`tempo para baixar ${title}.mp3 de YoutubeInMp3`)
+        //.pipe(fs.createWriteStream(
+        .on( `finish`, () => {
+            console.log(`\t\t\t Baixada: ${title}.mp3`)
+            console.timeEnd(`tempo para baixar ${title}.mp3 de YoutubeInMp3`)
+        })
       })
-    })
-  )
+    )
 }
 
 
