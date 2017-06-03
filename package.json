@@ -25,6 +25,7 @@
   "homepage": "https://github.com/suissa/pleaseGetSomeMusicForMe#readme",
   "dependencies": {
     "cheerio": "^0.22.0",
+    "fs-extra": "^3.0.1",
     "html-entities": "^1.2.0",
     "inquirer": "^3.0.5",
     "request": "^2.79.0",
@@ -34,6 +35,6 @@
   "bin": {
     "mp3": "./crawler/index.js"
   },
-  "main" : "./crawler/index.js",
+  "main": "./crawler/index.js",
   "preferGlobal": "true"
 }

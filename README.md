@@ -5,14 +5,15 @@
 
 <br>
 
-Entre na pasta `crawler` e execute:
 
 
 ```
 
-node index NOME DO ARTISTA OU DA MUSICA SEM ASPAS E COM ESPAÇO
+sudo npm i -g please-get-some-music-for-me
+
+//depois execute
+
+mp3 nome da música ou artista
 
 
 ```
-
-![Exmeplo de utilização](http://i.imgur.com/QZrVK9D.png)

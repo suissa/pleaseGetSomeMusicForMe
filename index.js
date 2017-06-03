@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 const os = require(`os`)
-const fs = require(`fs`)
+// const fs = require(`fs`)
 
 const utils = require('./util')
-
+const fs = require("fs-extra")
 const inquirer = require('inquirer')
 const Entities = require('html-entities').AllHtmlEntities
 const entities = new Entities()
-const PATH = './musics/'
+const PATH = '~/Desktop/'
 const SliderKZ = require('./providers/sliderkz')
 const MusicPleer = require('./providers/musicpleer')
 const YoutubeInMp3 = require('./providers/youtubeinmp3')
@@ -19,6 +19,11 @@ const eventEmitter = new events.EventEmitter()
 
 console.time( 'tempo para receber a resposta' )
 console.log(`\n\n\n\t\t INICIANDO A BUSCA PARA: ${find} ` )
+
+
+const foi = fs.ensureDirSync( PATH )
+
+console.log('foi', foi)
 
 const choose = (songs, cb) => {
 
@@ -70,6 +75,7 @@ Promise.enhancedRace([
     ( !response.songs )
       ? console.log("não foi escolhido/encontrado nenhuma música")
       : response.songs.map( el => {
+
           const ARTISTPATH = PATH + entities.decode(response.artist).replace('/', '_')
           const title = entities.decode(el.tit_art)
           const cb = (err) =>
