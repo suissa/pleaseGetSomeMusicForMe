@@ -23,8 +23,6 @@ console.log(`\n\n\n\t\t INICIANDO A BUSCA PARA: ${find} ` )
 
 const foi = fs.ensureDirSync( PATH )
 
-console.log('foi', foi)
-
 const choose = (songs, cb) => {
 
     const artists = []
@@ -44,7 +42,7 @@ const choose = (songs, cb) => {
         if ( !artists.includes( song.artist ) && song.artist != '' ) {
           artists.push( song.artist  )
         }
-        
+
         question1.choices.push( { name: entities.decode(song.tit_art) })
     })
 
@@ -65,41 +63,43 @@ const choose = (songs, cb) => {
   }
 
 Promise.enhancedRace([
-  MusicPleer.search(find),
+  //MusicPleer.search(find),
   SliderKZ.search(find),
-  YoutubeInMp3.search(find)
-]).then(body => {
+  //YoutubeInMp3.search(find)
+]).then(resp => {
 
-  choose(body.songs, (err, response) => {
+  resp.songs.then((songs) => {
+      choose(songs, (err, response) => {
 
-    ( !response.songs )
-      ? console.log("não foi escolhido/encontrado nenhuma música")
-      : response.songs.map( el => {
+        ( !response.songs )
+          ? console.log("não foi escolhido/encontrado nenhuma música")
+          : response.songs.map( el => {
 
-          const ARTISTPATH = PATH + entities.decode(response.artist).replace('/', '_')
-          const title = entities.decode(el.tit_art)
-          const cb = (err) =>
-          err 
-              ? console.log('Nao rolou criar as pastas aqui', err)
-              : body.download(title, entities.decode(el.url), ARTISTPATH+'/'+utils.decodeHTMLEntities(title+'.mp3'))
+              const ARTISTPATH = PATH + entities.decode(response.artist).replace('/', '_')
+              const title = entities.decode(el.tit_art)
+              const cb = (err) =>
+              err
+                  ? console.log('Nao rolou criar as pastas aqui', err)
+                  : resp.download(title, entities.decode(el.url), ARTISTPATH+'/'+utils.decodeHTMLEntities(title+'.mp3'))
 
-          Promise.
-            all([{
-              then: (resolve, reject) => {
-                utils.ensureExists(PATH, 0744, (err) => {
-                  return resolve(0)
-                })
-              }
-            }, {
-              then: (resolve, reject) => utils.ensureExists(ARTISTPATH, 0744, (err) => resolve(err))
-            }])
-            //artist folder
-            .then(err => (err.reduce((f, s) => f || s)) ? Promise.reject(err) : cb(null))
-            .catch(err => cb(err))
-          
-        })
-      
-      return response.songs
+              Promise.
+                all([{
+                  then: (resolve, reject) => {
+                    utils.ensureExists(PATH, 0744, (err) => {
+                      return resolve(0)
+                    })
+                  }
+                }, {
+                  then: (resolve, reject) => utils.ensureExists(ARTISTPATH, 0744, (err) => resolve(err))
+                }])
+                //artist folder
+                .then(err => (err.reduce((f, s) => f || s)) ? Promise.reject(err) : cb(null))
+                .catch(err => cb(err))
+
+            })
+
+          return response.songs
+      })
   })
 }, function (err) {
   console.log(err)

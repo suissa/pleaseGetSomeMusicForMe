@@ -7,6 +7,8 @@
 
 musics/*
 
+~/Desktop
+
 *.mp3
 # Logs
 logs
@@ -45,3 +47,5 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+package-lock.json

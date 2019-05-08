@@ -28,6 +28,7 @@
     "fs-extra": "^3.0.1",
     "html-entities": "^1.2.0",
     "inquirer": "^3.0.5",
+    "progress": "^2.0.3",
     "request": "^2.79.0",
     "request-promise": "^4.1.1",
     "youtube-crawler": "0.0.3"
