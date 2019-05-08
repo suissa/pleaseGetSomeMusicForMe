@@ -34,8 +34,8 @@
     "youtube-crawler": "0.0.3"
   },
   "bin": {
-    "mp3": "./crawler/index.js"
+    "mp3": "./index.js"
   },
-  "main": "./crawler/index.js",
+  "main": "./index.js",
   "preferGlobal": "true"
 }
