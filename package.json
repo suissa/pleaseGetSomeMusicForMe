@@ -1,6 +1,6 @@
 {
   "name": "please-get-some-music-for-me",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "description": "Baixador de musica via terminal",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,7 +15,10 @@
     "download",
     "cli",
     "terminal",
-    "hackudo"
+    "hackudo",
+    "suissa",
+    "webschool",
+    "noisquevoa"
   ],
   "author": "Suissa",
   "license": "WTFPL",
