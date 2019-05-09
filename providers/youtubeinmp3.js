@@ -17,7 +17,7 @@ const getLinks = {
 
 function YoutubeInMp3 () {
 
-  this.url = `${BASE}//download/?video=`
+  this.url = `${BASE}/download/?video=`
 
   this.buildSongs = (response) => {
 
