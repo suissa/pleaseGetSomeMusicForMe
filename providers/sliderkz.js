@@ -23,7 +23,6 @@ function SliderKZ () {
 
   this.buildSongs = (response) => {
 
-    console.timeEnd('tempo para receber a resposta')
     if ( ! response.audios ) return console.log('Não achou essa busca!')
 
     let pageCount = Object.keys(response.audios)[0]
