@@ -17,9 +17,7 @@ find = process.argv.filter( utils.getFind ).join('+')
 const events = require('events')
 const eventEmitter = new events.EventEmitter()
 
-console.time( 'tempo para receber a resposta' )
 console.log(`\n\n\n\t\t INICIANDO A BUSCA PARA: ${find} ` )
-
 
 const foi = fs.ensureDirSync( PATH )
 
@@ -65,7 +63,7 @@ const choose = (songs, cb) => {
 Promise.enhancedRace([
   //MusicPleer.search(find),
   SliderKZ.search(find),
-  //YoutubeInMp3.search(find)
+  YoutubeInMp3.search(find)
 ]).then(resp => {
 
   resp.songs.then((songs) => {

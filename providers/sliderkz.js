@@ -38,7 +38,7 @@ function SliderKZ () {
             s.url = `${BASE}/download/${s.id}/${s.duration}/${s.url}/${s.tit_art}.mp3?extra=${s.extra}`
             return s
         })
-        resolve(list)
+        resolve(newList)
     })
 
     return p.then((resp) => resp)
@@ -93,7 +93,6 @@ SliderKZ.prototype.prepareForDownload = function (title, uri, path) {
       .pipe(fs.createWriteStream(path))
       .on( `finish`, () => {
           console.log(`\t\t\t Baixada: ${title}.mp3`)
-          console.timeEnd(`tempo para baixar ${title}.mp3 de SliderKZ`)
       })
   )
 
