@@ -1,23 +1,37 @@
 #!/usr/bin/env node
 const os = require(`os`)
 // const fs = require(`fs`)
-
+const multimeter = require('multimeter');
 const utils = require('./util')
 const fs = require("fs-extra")
 const inquirer = require('inquirer')
 const Entities = require('html-entities').AllHtmlEntities
 const entities = new Entities()
+<<<<<<< 766d24ec7e9bcd4b0614bbc468d858f59fc299ac
 const PATH = './musicz/'
+=======
+const PATH = '~/Desktop/'
+
+multi = multimeter(process);
+multi.on('^C', process.exit);
+multi.charm.reset();
+
+bars = [];
+progress = [];
+deltas = [];
+
+>>>>>>> translating texts and adding multimeter
 const SliderKZ = require('./providers/sliderkz')
 const MusicPleer = require('./providers/musicpleer')
 const YoutubeInMp3 = require('./providers/youtubeinmp3')
+
 
 find = process.argv.filter( utils.getFind ).join('+')
 
 const events = require('events')
 const eventEmitter = new events.EventEmitter()
 
-console.log(`\n\n\n\t\t INICIANDO A BUSCA PARA: ${find} ` )
+console.log(`\n\n\n\t\t I'M SEARCHING FOR: ${find} ` )
 
 const foi = fs.ensureDirSync( PATH )
 
@@ -27,10 +41,10 @@ const choose = (songs, cb) => {
 
     const question1 = {
       type: 'checkbox',
-      message: 'Selecione as canções',
+      message: '-',
       name: 'songs',
       choices: [
-        new inquirer.Separator(' = As sonzeiras = ')
+        new inquirer.Separator('')
       ],
       validate: (answer) => !! answer.length
     }
@@ -58,7 +72,7 @@ const choose = (songs, cb) => {
         )
     });
 
-  }
+ }
 
 Promise.enhancedRace([
   //MusicPleer.search(find),
@@ -69,16 +83,22 @@ Promise.enhancedRace([
   resp.songs.then((songs) => {
       choose(songs, (err, response) => {
 
-        ( !response.songs )
-          ? console.log("não foi escolhido/encontrado nenhuma música")
-          : response.songs.map( el => {
+        if ( !response.songs ) {
+            throw new Error("no musics were found")
+        }
+
+        multi.charm.reset();
+
+         multi.write("Downloading your songs...\n\n");
+
+        response.songs.map( (el, i) => {
 
               const ARTISTPATH = PATH + entities.decode(response.artist).replace('/', '_')
               const title = entities.decode(el.tit_art)
               const cb = (err) =>
               err
-                  ? console.log('Nao rolou criar as pastas aqui', err)
-                  : resp.download(title, entities.decode(el.url), ARTISTPATH+'/'+utils.decodeHTMLEntities(title+'.mp3'))
+                  ? console.log("can't create folders", err)
+                  : resp.download(title, entities.decode(el.url), ARTISTPATH+'/'+utils.decodeHTMLEntities(title+'.mp3'), i)
 
               Promise.
                 all([{
@@ -96,7 +116,8 @@ Promise.enhancedRace([
 
             })
 
-          return response.songs
+
+        return response.songs
       })
   })
 }, function (err) {
