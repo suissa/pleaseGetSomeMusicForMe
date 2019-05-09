@@ -1,7 +1,7 @@
 'use strict'
 
 const rp = require(`request-promise`)
-const ProgressBar = require(`progress`)
+const ProgressBar = require(`multi-progress`)
 const crawler = require('youtube-crawler')
 const cheerio = require('cheerio')
 const fs = require('fs')
@@ -24,9 +24,6 @@ function YoutubeInMp3 () {
     var self = this
 
     let list = response
-
-    console.log(`\n\t\t Recebi a lista de ${list.length} mp3s ... `)
-    console.log(`\n\t\t MAS BAIXAREI APENAS AS QUE VC ESCOLHER! `)
 
     let songs = list.map(song => {
 
@@ -66,7 +63,7 @@ YoutubeInMp3.prototype.search = function (query) {
 }).catch(err => Promise.reject(err))
 }
 
-YoutubeInMp3.prototype.prepareForDownload = function (title, uri, path) {
+YoutubeInMp3.prototype.prepareForDownload = function (title, uri, path, index) {
 
   let self = this
   getLinks.uri = uri
@@ -78,23 +75,27 @@ YoutubeInMp3.prototype.prepareForDownload = function (title, uri, path) {
         let url = BASE + $('#download').prop('href')
 
         rp(url).on('response', res => {
-          console.log(`\n\t\t baixando ${title} ... `)
           var len = parseInt(res.headers['content-length'], 10);
 
-          console.log();
-          var bar = new ProgressBar('  baixando [:bar] :rate/bps :percent :etas', {
-            complete: '=',
-            incomplete: ' ',
-            width: 20,
-            total: len
+          let s = title + ': \n'
+          multi.write(s);
+          var bar = multi(40, 3 + index, {
+              width : 20,
+              solid : {
+                  text : ' ',
+                  foreground : 'white',
+                  background : 'blue'
+              },
+              empty : { text : ' ' },
           });
 
+          var total = 0
           res.on('data', function (chunk) {
-            bar.tick(chunk.length);
+              total += (chunk.byteLength * 100)  / len;
+              bar.percent(parseInt(Math.round(total)));
           });
 
           res.on('end', function () {
-            console.log('\n');
           });
         })
         .on(`error`, (err) =>
@@ -102,7 +103,7 @@ YoutubeInMp3.prototype.prepareForDownload = function (title, uri, path) {
       //.pipe(fs.createWriteStream())
       .pipe(fs.createWriteStream(path))
       .on( `finish`, () => {
-          console.log(`\t\t\t Baixada: ${title}.mp3`)
+
       })
     })
   )
