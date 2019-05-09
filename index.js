@@ -7,10 +7,7 @@ const fs = require("fs-extra")
 const inquirer = require('inquirer')
 const Entities = require('html-entities').AllHtmlEntities
 const entities = new Entities()
-<<<<<<< 766d24ec7e9bcd4b0614bbc468d858f59fc299ac
-const PATH = './musicz/'
-=======
-const PATH = '~/Desktop/'
+const PATH = '~/musicz/'
 
 multi = multimeter(process);
 multi.on('^C', process.exit);
@@ -20,7 +17,6 @@ bars = [];
 progress = [];
 deltas = [];
 
->>>>>>> translating texts and adding multimeter
 const SliderKZ = require('./providers/sliderkz')
 const MusicPleer = require('./providers/musicpleer')
 const YoutubeInMp3 = require('./providers/youtubeinmp3')
