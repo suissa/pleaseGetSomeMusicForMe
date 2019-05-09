@@ -2,7 +2,6 @@
 
 const rp = require(`request-promise`)
 const fs = require('fs')
-const ProgressBar = require('progress');
 
 const BASE = `https://slider.kz`
 
@@ -27,9 +26,6 @@ function SliderKZ () {
 
     let pageCount = Object.keys(response.audios)[0]
     const list = response.audios[Object.keys(response.audios)[0]]
-
-    console.log(`\n\t\t Recebi a lista de ${list.length} mp3s ... `)
-    console.log(`\n\t\t MAS BAIXAREI APENAS AS QUE VC ESCOLHER! `)
 
     var p = new Promise((resolve, reject) => {
 
@@ -70,20 +66,25 @@ SliderKZ.prototype.prepareForDownload = function (title, uri, path) {
     .on('response', res => {
           var len = parseInt(res.headers['content-length'], 10);
 
-          console.log();
-          var bar = new ProgressBar('  baixando [:bar] :rate/bps :percent :etas', {
-            complete: '=',
-            incomplete: ' ',
-            width: 20,
-            total: len
+          let s = title + ': \n'
+          multi.write(s);
+          var bar = multi(40, 3 + index, {
+              width : 20,
+              solid : {
+                  text : ' ',
+                  foreground : 'white',
+                  background : 'blue'
+              },
+              empty : { text : ' ' },
           });
 
+          var total = 0
           res.on('data', function (chunk) {
-            bar.tick(chunk.length);
+              total += (chunk.byteLength * 100)  / len;
+              bar.percent(parseInt(Math.round(total)));
           });
 
           res.on('end', function () {
-            console.log('\n');
           });
         })
         .on(`error`, (err) =>

@@ -1,7 +1,6 @@
 'use strict'
 
 const rp = require(`request-promise`)
-const ProgressBar = require(`multi-progress`)
 const crawler = require('youtube-crawler')
 const cheerio = require('cheerio')
 const fs = require('fs')
