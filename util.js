@@ -25,7 +25,7 @@ module.exports = {
 
   findBestArtistMatch: ( str, anotherString ) => {
     //TODO: improve validation
-    if ( anotherString.length > anotherString.length ) {
+    if ( str.length > anotherString.length ) {
       let match = new RegExp( str, 'i' ).test( find.replace( '+', ' ' ) )
 
       if (!match) {
@@ -52,7 +52,7 @@ module.exports = {
       mask = 0777
     }
     fs.mkdir( path.replace('"', '').replace('"', ''), mask, (err) =>
-      ( err ) 
+      ( err )
         ? ( err.code == 'EEXIST' ) ? cb( null ) : cb( err )
         : cb( null )
     )
@@ -62,5 +62,4 @@ module.exports = {
     return ( self.length > 1 ) ? self.findIndex( s => getIndex( s, song ) ) === i : true
   }
 
-} 
-
+}
