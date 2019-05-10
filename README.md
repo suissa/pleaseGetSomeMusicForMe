@@ -30,10 +30,5 @@ Now you can search for any song using:
 
 Authors:
 
-<<<<<<< HEAD
 - [Suissa](https://github.com/suissa)
 - [Rodrigo](https://github.com/diguinhorocks)
-=======
-- [Suissa]()
-- [Rodrigo]()
->>>>>>> 5337e25697826ae7c8b2c5baf4bccbc4521554a3
