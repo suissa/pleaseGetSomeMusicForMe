@@ -30,6 +30,7 @@ function YoutubeInMp3 () {
 
       song.tit_art = song.title
       song.url = this.url + song.link
+      song.provider = 'YoutubeInMp3'
       return song
     })
 
@@ -59,7 +60,7 @@ YoutubeInMp3.prototype.search = function (query) {
         })
       })
     }
-}).catch(err => Promise.reject(err))
+    }).catch(err => Promise.reject(err))
 }
 
 YoutubeInMp3.prototype.prepareForDownload = function (title, uri, path, index) {
@@ -67,13 +68,13 @@ YoutubeInMp3.prototype.prepareForDownload = function (title, uri, path, index) {
   let self = this
   getLinks.uri = uri
 
-  return Promise.resolve(
-    rp.get(getLinks)
+  return new Promise((resolve, reject) => {
+      rp.get(getLinks)
       .then(body => {
         let $ = cheerio.load(body)
         let url = BASE + $('#download').prop('href')
 
-        rp(url).on('response', res => {
+        return rp(url).on('response', res => {
           var len = parseInt(res.headers['content-length'], 10);
 
           let s = title + ': \n'
@@ -95,17 +96,18 @@ YoutubeInMp3.prototype.prepareForDownload = function (title, uri, path, index) {
           });
 
           res.on('end', function () {
+              resolve()
           });
         })
         .on(`error`, (err) =>
-          console.log(`MERDA AO BAIXAR DE: ${url} \n`, title))
+          multi.write(`got a problem downloading: ${title} \n`))
       //.pipe(fs.createWriteStream())
       .pipe(fs.createWriteStream(path))
       .on( `finish`, () => {
 
       })
     })
-  )
+    })
 }
 
 
