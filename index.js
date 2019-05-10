@@ -39,6 +39,7 @@ const choose = (songs, cb) => {
       type: 'checkbox',
       message: '-',
       name: 'songs',
+      pageSize: 20,
       choices: [
         new inquirer.Separator('')
       ],
