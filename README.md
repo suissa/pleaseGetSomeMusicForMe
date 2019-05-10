@@ -9,12 +9,23 @@
 
 ```
 
-sudo npm i -g please-get-some-music-for-me
+> npm i please-get-some-music-for-me
 
-//depois execute
+```
 
-mp3 nome da música ou artista
+Then, to install globally run:
 
+```
+
+> npm i -g
+
+```
+
+Now you can search for any song using:
+
+```
+
+> mp3 name from artist or music
 
 ```
 
