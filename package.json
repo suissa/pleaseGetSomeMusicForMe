@@ -1,6 +1,6 @@
 {
   "name": "please-get-some-music-for-me",
-  "version": "2.0.5",
+  "version": "2.0.8",
   "description": "Baixador de musica via terminal",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
