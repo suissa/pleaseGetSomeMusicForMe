@@ -1,7 +1,7 @@
 {
   "name": "please-get-some-music-for-me",
-  "version": "2.0.4",
-  "description": "Baixador de musica via terminal",
+  "version": "2.0.9",
+  "description": "Get any music in your terminal",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -33,6 +33,7 @@
     "inquirer": "^3.0.5",
     "multi-progress": "^2.0.0",
     "multimeter": "^0.1.1",
+    "platform-folders": "^0.4.0",
     "progress": "^2.0.3",
     "request": "^2.79.0",
     "request-promise": "^4.1.1",
