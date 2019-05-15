@@ -22,7 +22,7 @@ function SliderKZ () {
 
   this.buildSongs = (response) => {
 
-    if ( ! response.audios ) return console.log('Não achou essa busca!')
+    if ( ! response.audios ) return console.log('Songs not found!')
 
     let pageCount = Object.keys(response.audios)[0]
     const list = response.audios[Object.keys(response.audios)[0]]
@@ -31,6 +31,7 @@ function SliderKZ () {
 
         let newList = list.map(s => {
             s.url = `${BASE}/download/${s.id}/${s.duration}/${s.url}/${s.tit_art}.mp3?extra=${s.extra}`
+            s.provider = 'SliderKZ'
             return s
         })
         resolve(newList)
@@ -56,46 +57,45 @@ SliderKZ.prototype.search = function (query) {
     .catch(err => Promise.reject(err)))
 }
 
-SliderKZ.prototype.prepareForDownload = function (title, uri, path) {
+SliderKZ.prototype.prepareForDownload = function (title, uri, path, index) {
 
   let self = this
   getLinks.uri = uri
 
-  return Promise.resolve(
-    rp.get(getLinks)
-    .on('response', res => {
-          var len = parseInt(res.headers['content-length'], 10);
+  return new Promise((resolve, reject) => {
+      rp.get(getLinks)
+      .on('response', res => {
+            var len = parseInt(res.headers['content-length'], 10);
 
-          let s = title + ': \n'
-          multi.write(s);
-          var bar = multi(40, 3 + index, {
-              width : 20,
-              solid : {
-                  text : ' ',
-                  foreground : 'white',
-                  background : 'blue'
-              },
-              empty : { text : ' ' },
-          });
+            let s = title + ': \n'
+            multi.write(s);
+            var bar = multi(40, 3 + index, {
+                width : 20,
+                solid : {
+                    text : ' ',
+                    foreground : 'white',
+                    background : 'blue'
+                },
+                empty : { text : ' ' },
+            });
 
-          var total = 0
-          res.on('data', function (chunk) {
-              total += (chunk.byteLength * 100)  / len;
-              bar.percent(parseInt(Math.round(total)));
-          });
+            var total = 0
+            res.on('data', function (chunk) {
+                total += (chunk.byteLength * 100)  / len;
+                bar.percent(parseInt(Math.round(total)));
+            });
 
-          res.on('end', function () {
-          });
+            res.on('end', function () {
+                resolve()
+            });
+          })
+          .on(`error`, (err) =>
+            multi.write(`got a problem downloading: ${title} \n`))
+        //.pipe(fs.createWriteStream())
+        .pipe(fs.createWriteStream(path))
+        .on( `finish`, () => {
         })
-        .on(`error`, (err) =>
-          console.log(`MERDA AO BAIXAR DE: ${songUrl} \n`, title))
-      //.pipe(fs.createWriteStream())
-      .pipe(fs.createWriteStream(path))
-      .on( `finish`, () => {
-          console.log(`\t\t\t Baixada: ${title}.mp3`)
-      })
-  )
-
+  })
 
 }
 

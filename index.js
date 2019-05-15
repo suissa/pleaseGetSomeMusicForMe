@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+const pf = require('platform-folders');
+
 const os = require(`os`)
 // const fs = require(`fs`)
 const multimeter = require('multimeter');
@@ -7,15 +9,11 @@ const fs = require("fs-extra")
 const inquirer = require('inquirer')
 const Entities = require('html-entities').AllHtmlEntities
 const entities = new Entities()
-const PATH = '~/musicz/'
+const PATH = pf.getMusicFolder() + '/'
 
 multi = multimeter(process);
 multi.on('^C', process.exit);
 multi.charm.reset();
-
-bars = [];
-progress = [];
-deltas = [];
 
 const SliderKZ = require('./providers/sliderkz')
 const MusicPleer = require('./providers/musicpleer')
@@ -77,7 +75,7 @@ Promise.enhancedRace([
   YoutubeInMp3.search(find)
 ]).then(resp => {
 
-  resp.songs.then((songs) => {
+    resp.songs.then((songs) => {
       choose(songs, (err, response) => {
 
         if ( !response.songs ) {
@@ -86,37 +84,41 @@ Promise.enhancedRace([
 
         multi.charm.reset();
 
-         multi.write("Downloading your songs...\n\n");
+        multi.write("Downloading your songs...\n\n");
+
+        let musicList = []
 
         response.songs.map( (el, i) => {
 
-              const ARTISTPATH = PATH + entities.decode(response.artist).replace('/', '_')
-              const title = entities.decode(el.tit_art)
-              const cb = (err) =>
-              err
-                  ? console.log("can't create folders", err)
-                  : resp.download(title, entities.decode(el.url), ARTISTPATH+'/'+utils.decodeHTMLEntities(title+'.mp3'), i)
+          const ARTISTPATH = PATH + entities.decode(response.artist).replace('/', '_')
+          const title = entities.decode(el.tit_art)
+          const cb = (err) => err ? console.log("can't create folders", err) : null
 
-              Promise.
-                all([{
-                  then: (resolve, reject) => {
-                    utils.ensureExists(PATH, 0744, (err) => {
-                      return resolve(0)
-                    })
-                  }
-                }, {
-                  then: (resolve, reject) => utils.ensureExists(ARTISTPATH, 0744, (err) => resolve(err))
-                }])
-                //artist folder
-                .then(err => (err.reduce((f, s) => f || s)) ? Promise.reject(err) : cb(null))
-                .catch(err => cb(err))
+          musicList.push(resp.download(title, entities.decode(el.url), ARTISTPATH+'/'+utils.decodeHTMLEntities(title+'.mp3'), i))
 
-            })
+          Promise.
+            all([{
+              then: (resolve, reject) => {
+                utils.ensureExists(PATH, 0744, (err) => {
+                  return resolve(0)
+                })
+              }
+            }, {
+              then: (resolve, reject) => utils.ensureExists(ARTISTPATH, 0744, (err) => resolve(err))
+            }])
+            //artist folder
+            .then(err => (err.reduce((f, s) => f || s)) ? Promise.reject(err) : cb(null))
+            .catch(err => cb(err))
+
+        })
+
+        Promise.all(musicList)
+        .then(() => multi.write(`\n\nmusics downloaded @ ${pf.getMusicFolder()}!\n` ))
 
 
         return response.songs
       })
-  })
+    })
 }, function (err) {
   console.log(err)
 })
