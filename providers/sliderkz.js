@@ -35,52 +35,53 @@ const buildSongs = (response) =>
     : songsFounded(response.audios)
 
 
+const prepareForDownload = (title, uri, path, index) => {
+
+  // let self = this
+  getLinks.uri = uri
+
+  return new Promise((resolve, reject) => {
+      rp.get(getLinks)
+      .on('response', res => {
+            var len = parseInt(res.headers['content-length'], 10);
+
+            let s = title + ': \n'
+            multi.write(s);
+            var bar = multi(40, 3 + index, {
+                width : 20,
+                solid : {
+                    text : ' ',
+                    foreground : 'white',
+                    background : 'blue'
+                },
+                empty : { text : ' ' },
+            });
+
+            var total = 0
+            res.on('data', function (chunk) {
+                total += (chunk.byteLength * 100)  / len;
+                bar.percent(parseInt(Math.round(total)));
+            });
+
+            res.on('end', function () {
+                resolve()
+            });
+          })
+          .on(`error`, (err) =>
+            multi.write(`got a problem downloading: ${title} \n`))
+        //.pipe(fs.createWriteStream())
+        .pipe(fs.createWriteStream(path))
+        .on( `finish`, () => {
+        })
+  })
+
+}
+
 const LIB = () => {
   let url = `${BASE}/vk_auth.php?&q=`
   let page = `&page=0`
 
 
-  const prepareForDownload = (title, uri, path, index) => {
-
-    let self = this
-    getLinks.uri = uri
-  
-    return new Promise((resolve, reject) => {
-        rp.get(getLinks)
-        .on('response', res => {
-              var len = parseInt(res.headers['content-length'], 10);
-  
-              let s = title + ': \n'
-              multi.write(s);
-              var bar = multi(40, 3 + index, {
-                  width : 20,
-                  solid : {
-                      text : ' ',
-                      foreground : 'white',
-                      background : 'blue'
-                  },
-                  empty : { text : ' ' },
-              });
-  
-              var total = 0
-              res.on('data', function (chunk) {
-                  total += (chunk.byteLength * 100)  / len;
-                  bar.percent(parseInt(Math.round(total)));
-              });
-  
-              res.on('end', function () {
-                  resolve()
-              });
-            })
-            .on(`error`, (err) =>
-              multi.write(`got a problem downloading: ${title} \n`))
-          //.pipe(fs.createWriteStream())
-          .pipe(fs.createWriteStream(path))
-          .on( `finish`, () => {
-          })
-    })
-  
-  }
 
   const search = (query) => {
 

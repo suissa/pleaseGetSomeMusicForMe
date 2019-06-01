@@ -1,5 +1,7 @@
 # Refactoring
 
+A ideia dessa refatoração é modularizar atomicamente cada lógica já existente para que possamos criar um GERADOR de Providers baseado apenas em um JSON que possua os dados necessários, com isso nós padronizamos a forma que o `Provider` irá trabalhar e encapsulamos toda a lógica necessária para que outras pessoas possam contribuir criando novos `Providers` de forma simples e rápida.
+
 ## Providers
 
 ### Modelo Padrão
@@ -430,6 +432,60 @@ const songsFounded = (obj) =>
   new Promise((resolve, reject) => resolve(getSongs(obj).map(getList())))
     .then((resp) => resp)
 ```
+
+
+
+##### Final 2: refatorando a função prepareForDownload
+
+Entenda que precisamos refatorar essa função mesmo ela sendo maior que a `search` pois essa utiliza tanto a `buildSongs` como a `prepareForDownload`.
+
+Primeiro passo é recortar ela de dentro da função principal e colocar fora desse escopo:
+
+```js
+const prepareForDownload = (title, uri, path, index) => {
+
+  // let self = this
+  getLinks.uri = uri
+
+  return new Promise((resolve, reject) => {
+      rp.get(getLinks)
+      .on('response', res => {
+            var len = parseInt(res.headers['content-length'], 10);
+
+            let s = title + ': \n'
+            multi.write(s);
+            var bar = multi(40, 3 + index, {
+                width : 20,
+                solid : {
+                    text : ' ',
+                    foreground : 'white',
+                    background : 'blue'
+                },
+                empty : { text : ' ' },
+            });
+
+            var total = 0
+            res.on('data', function (chunk) {
+                total += (chunk.byteLength * 100)  / len;
+                bar.percent(parseInt(Math.round(total)));
+            });
+
+            res.on('end', function () {
+                resolve()
+            });
+          })
+          .on(`error`, (err) =>
+            multi.write(`got a problem downloading: ${title} \n`))
+        //.pipe(fs.createWriteStream())
+        .pipe(fs.createWriteStream(path))
+        .on( `finish`, () => {
+        })
+  })
+
+}
+```
+
+O código já existente irá funcionar normalmente se você fizer isso, agora precisamos modularizar as funções internas:
 
 
 <hr>
