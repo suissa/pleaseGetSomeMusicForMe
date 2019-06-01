@@ -72,7 +72,7 @@ const choose = (songs, cb) => {
 Promise.enhancedRace([
   //MusicPleer.search(find),
   SliderKZ.search(find),
-  YoutubeInMp3.search(find)
+  // YoutubeInMp3.search(find)
 ]).then(resp => {
 
     resp.songs.then((songs) => {
