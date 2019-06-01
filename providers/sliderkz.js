@@ -15,12 +15,18 @@ const getLinks = {
   json: true
 }
 
+const existsProp = (prop) => ({ in: (obj) => !obj[prop]})
+const getPageCount = (obj) => Object.keys(obj)[0]
+
+
 const buildSongs = (response) => {
 
-  if ( ! response.audios ) return console.log('Songs not found!')
-
-  let pageCount = Object.keys(response.audios)[0]
-  const list = response.audios[Object.keys(response.audios)[0]]
+  if ( existsProp('audios').in(response) ) return console.log('Songs not found!')
+  
+  // let pageCount = getPageCount(response.audios)
+  // let pageCount = Object.keys(response.audios)[0]
+  // const list = 
+  const list = response.audios[getPageCount(response.audios)]
 
   const p = new Promise((resolve, reject) => {
 
@@ -38,7 +44,6 @@ const buildSongs = (response) => {
 const PROVIDER = () => {
   let url = `${BASE}/vk_auth.php?&q=`
   let page = `&page=0`
-
 
 
   const prepareForDownload = (title, uri, path, index) => {
