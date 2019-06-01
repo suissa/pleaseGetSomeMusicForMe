@@ -137,7 +137,9 @@ SliderKZ.prototype.prepareForDownload = function (title, uri, path, index) {
 }
 ```
 
-#####Final:
+<hr>
+
+##### Final:
 
 ```js
 
