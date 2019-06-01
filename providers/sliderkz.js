@@ -23,12 +23,16 @@ const getList = (provider = PROVIDER) => (obj) => {
   return obj
 }
 const getSongs = (obj) => obj[getPageCount(obj)]
+const songsNotFound = () => console.log('Songs not found!')
+const songsFounded = (obj) => 
+  new Promise((resolve, reject) => resolve(getSongs(obj).map(getList())))
+    .then((resp) => resp)
+
 
 const buildSongs = (response) => 
   ( existsProp('audios').in(response) ) 
-    ? console.log('Songs not found!')
-    : new Promise((resolve, reject) => resolve(getSongs(response.audios).map(getList())))
-      .then((resp) => resp)
+    ? songsNotFound()
+    : songsFounded(response.audios)
 
 
 const LIB = () => {

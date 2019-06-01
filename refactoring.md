@@ -413,6 +413,24 @@ const buildSongs = (response) =>
       .then((resp) => resp)
 ```
 
+Uma dica que eu dou é sempre encapsular a lógica utilizada no if ternário, assim:
+
+```js
+const buildSongs = (response) => 
+  ( existsProp('audios').in(response) ) 
+    ? songsNotFound()
+    : songsFounded(response.audios)
+```
+
+Para conseguir esse resultado basta encaspsular as 2 lógicas da seguinte forma:
+
+```js
+const songsNotFound = () => console.log('Songs not found!')
+const songsFounded = (obj) => 
+  new Promise((resolve, reject) => resolve(getSongs(obj).map(getList())))
+    .then((resp) => resp)
+```
+
 
 <hr>
 
