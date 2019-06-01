@@ -22,26 +22,14 @@ const getList = (provider = PROVIDER) => (obj) => {
   obj.provider = provider
   return obj
 }
+const getSongs = (obj) => obj[getPageCount(obj)]
 
-const buildSongs = (response) => {
+const buildSongs = (response) => 
+  ( existsProp('audios').in(response) ) 
+    ? console.log('Songs not found!')
+    : new Promise((resolve, reject) => resolve(getSongs(response.audios).map(getList())))
+      .then((resp) => resp)
 
-  if ( existsProp('audios').in(response) ) return console.log('Songs not found!')
-  
-  const list = response.audios[getPageCount(response.audios)]
-
-  const p = new Promise((resolve, reject) => {
-
-  const newList = list.map(getList())
-  // let newList = list.map(s => {
-  //     s.url = `${BASE}/download/${s.id}/${s.duration}/${s.url}/${s.tit_art}.mp3?extra=${s.extra}`
-  //     s.provider = 'SliderKZ'
-  //     return s
-  // })
-    resolve(newList)
-  })
-
-  return p.then((resp) => resp)
-}
 
 const LIB = () => {
   let url = `${BASE}/vk_auth.php?&q=`

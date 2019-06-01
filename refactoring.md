@@ -365,6 +365,55 @@ const newList = list.map(getList('NovoProvider'))
 ```
 
 
+```js
+const p = new Promise((resolve, reject) => {
+  // const newList = list.map(getList())
+  return resolve(list.map(getList()))
+})
+```
+
+**Agora percebendo que possuímos apenas 1 linha dentro da `Promise` que dá um `return` podemos refatorarr para deixar isso em apenas 1 linha**:
+
+```js
+const p = new Promise((resolve, reject) => resolve(list.map(getList())))
+```
+
+Como utilizamos o valor `list` pro `map` nós também podemos refatorar para uma função:
+
+```js
+const getSongs = (obj) => obj[getPageCount(obj)]
+```
+
+Para deixar nossa `Promise` assim:
+
+```js
+return new Promise((resolve, reject) => resolve(getSongs(response.audios).map(getList())))
+            .then((resp) => resp)
+```
+
+> Agora olhe como está nossa função `buildSongs` atual:
+
+```js
+const buildSongs = (response) => {
+
+  if ( existsProp('audios').in(response) ) return console.log('Songs not found!')
+  
+  return new Promise((resolve, reject) => resolve(getSongs(response.audios).map(getList())))
+              .then((resp) => resp)
+}
+```
+
+**Percebendo que possuímos apenas um `if` e logo após o `return` podemos transformar ela em uma função de uma linha apenas:**
+
+```js
+const buildSongs = (response) => 
+  ( existsProp('audios').in(response) ) 
+    ? console.log('Songs not found!')
+    : new Promise((resolve, reject) => resolve(getSongs(response.audios).map(getList())))
+      .then((resp) => resp)
+```
+
+
 <hr>
 
 ```js
