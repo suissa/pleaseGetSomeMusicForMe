@@ -2,8 +2,8 @@
 
 const rp = require(`request-promise`)
 const fs = require('fs')
-
 const BASE = `https://slider.kz`
+const PROVIDER = 'SliderKZ'
 
 const getLinks = {
   uri: '',
@@ -17,31 +17,33 @@ const getLinks = {
 
 const existsProp = (prop) => ({ in: (obj) => !obj[prop]})
 const getPageCount = (obj) => Object.keys(obj)[0]
-
+const getList = (provider = PROVIDER) => (obj) => {
+  obj.url = `${BASE}/download/${obj.id}/${obj.duration}/${obj.url}/${obj.tit_art}.mp3?extra=${obj.extra}`
+  obj.provider = provider
+  return obj
+}
 
 const buildSongs = (response) => {
 
   if ( existsProp('audios').in(response) ) return console.log('Songs not found!')
   
-  // let pageCount = getPageCount(response.audios)
-  // let pageCount = Object.keys(response.audios)[0]
-  // const list = 
   const list = response.audios[getPageCount(response.audios)]
 
   const p = new Promise((resolve, reject) => {
 
-      let newList = list.map(s => {
-          s.url = `${BASE}/download/${s.id}/${s.duration}/${s.url}/${s.tit_art}.mp3?extra=${s.extra}`
-          s.provider = 'SliderKZ'
-          return s
-      })
-      resolve(newList)
+  const newList = list.map(getList())
+  // let newList = list.map(s => {
+  //     s.url = `${BASE}/download/${s.id}/${s.duration}/${s.url}/${s.tit_art}.mp3?extra=${s.extra}`
+  //     s.provider = 'SliderKZ'
+  //     return s
+  // })
+    resolve(newList)
   })
 
   return p.then((resp) => resp)
 }
 
-const PROVIDER = () => {
+const LIB = () => {
   let url = `${BASE}/vk_auth.php?&q=`
   let page = `&page=0`
 
@@ -105,12 +107,12 @@ const PROVIDER = () => {
   }
   
 
-  const lib = {
+  const actions = {
     buildSongs,
     prepareForDownload,
     search
   }
-  return lib
+  return actions
 }
 
-module.exports = PROVIDER()
+module.exports = LIB()

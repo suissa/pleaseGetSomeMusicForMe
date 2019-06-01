@@ -314,7 +314,55 @@ const list = response.audios[getPageCount(response.audios)]
 Ou seja, já eliminamos a necessidade de chamar 2x a mesma lógica e eliminamos a necessidade da variável `pageCount`, **pois se vc analisar o código ela nem era usada!!!**
 
 
+##### Final 2: Modularizando a função do map
 
+Temos o seguinte código, porém o interessante é encapsular essa lógica do `map` em uma funçnao externa e modularizada:
+
+```js
+let newList = list.map(s => {
+    s.url = `${BASE}/download/${s.id}/${s.duration}/${s.url}/${s.tit_art}.mp3?extra=${s.extra}`
+    s.provider = 'SliderKZ'
+    return s
+})
+```
+
+Logo podemos apenas recortar o que temos dentro do `map()` para:
+
+```js
+const getList = (obj) => {
+  obj.url = `${BASE}/download/${obj.id}/${obj.duration}/${obj.url}/${obj.tit_art}.mp3?extra=${obj.extra}`
+  obj.provider = 'SliderKZ'
+  return obj
+}
+```
+
+E utilizar asssim:
+
+```js
+const newList = list.map(getList)
+```
+
+Contudo podemos refatorar um pouco mais para deixar essa função mais genérica para diferentes *providers*, fazendo o seguinte:
+
+- primeiro criando uma constante no início do arquivo com o nome do *prvider*:
+  - `const PROVIDER = 'SliderKZ'`
+- depois adicionando esse valor como entrada para essa função, porém para isso **precisamos** criar uma closure da seguinte forma:
+  - `const getList = (provider = PROVIDER) => (obj) =>`
+
+Percebeu que utilizei [Default Parameters]() já definindo o valor que criamos anterioremente.
+
+Nesse caso seu uso será assim:
+
+```js
+// direto sem passar o valor
+const newList = list.map(getList())
+
+// passando aquela constante inicial
+const newList = list.map(getList(PROVIDER))
+
+// passando um valor diferente
+const newList = list.map(getList('NovoProvider'))
+```
 
 
 <hr>
